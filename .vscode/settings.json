@@ -1,0 +1,16 @@
+{
+    "dart.flutterHotReloadOnSave": "all",
+    "dart.lineLength": 100,
+    "dart.previewFlutterUiGuides": true,
+    "flutter.logLevel": "debug",
+    "[dart]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": true
+        }
+    },
+    "[flutter]": {
+        "editor.formatOnSave": true
+    },
+    "cmake.sourceDirectory": "C:/Users/Sahil.yadav/Desktop/music_app/windows/flutter"
+}
