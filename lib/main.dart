@@ -40,9 +40,7 @@ class SongListScreen extends StatelessWidget {
     Song('Song 3', 'Artist 3'),
   ];
 
-  const SongListScreen({super.key});
-
-  // Note: removed 'const' due to non-const 'songs' field
+  SongListScreen({super.key}); // non-const due to 'songs' field
 
   @override
   Widget build(BuildContext context) {
