@@ -1,18 +1,16 @@
-# YouTube Music-like Live Music App Implementation
+# UI Revamp TODO
 
-## Current Status: In Progress
+## Plan Approved: Apply all UI changes
 
-### Implementation Steps:
+- [x] 1. `lib/main.dart` — Unify theme colors (deep purple primary + amber accent), fix BottomNavigationBar.
+- [x] 2. `lib/screens/now_playing_screen.dart` — Square album art, better gradient, improved controls, favorite toggle.
+- [x] 3. `lib/widgets/now_playing_bar.dart` — Progress bar, tap-to-expand, fix icons, better layout.
+- [x] 4. `lib/widgets/song_tile.dart` — Custom row design, playing indicator, better spacing.
+- [x] 5. `lib/screens/home_screen.dart` — Horizontal carousels, improved SliverAppBar, section headers.
+- [x] 6. `lib/screens/live_screen.dart` — Better cards, image scrim, improved typography.
+- [x] 7. `lib/screens/library_screen.dart` — Category chips, polished list, headers.
+- [x] 8. `lib/screens/search_screen.dart` — Transparent AppBar, empty state, icons in TextField.
 
-- [x] 1. Update pubspec.yaml: Add cached_network_image, http deps; assets section for sample audio/images.
-- [x] 2. Create lib/models/song.dart and lib/models/live_event.dart (data models).
-- [x] 3. Create lib/services/audio_player_service.dart (just_audio integration with provider).
-- [x] 4. Create lib/services/mock_api_service.dart (mock data for songs, live events).
-- [x] 5. Create UI screens: lib/screens/home_screen.dart, live_screen.dart, search_screen.dart, library_screen.dart, now_playing_screen.dart.
-- [x] 6. Create reusable widgets: lib/widgets/song_tile.dart, now_playing_bar.dart.
-- [x] 7. Refactor lib/main.dart: Add Provider, BottomNavigationBar, integrate services.
-- [x] 8. Run `flutter pub get`
-- [x] 9. Test `flutter run` - verify tabs, playback, live mock.
-- [x] Previous fixes (NDK, deps) - COMPLETE
+## Verification
+- [x] `flutter analyze` — only pre-existing issues in `audio_player_service.dart` remain (no new issues introduced).
 
-**Next:** Create screens and widgets.
