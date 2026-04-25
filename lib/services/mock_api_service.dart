@@ -5,6 +5,17 @@ import '../models/live_event.dart';
 class MockApiService {
   static List<Song> getMockSongs() {
     return [
+      // Real Local Song
+      Song(
+        id: 'real1',
+        title: 'Tum Ho Toh',
+        artist: 'Vishal Mishra, Hansika Pareek',
+        album: 'Saiyaara',
+        imageUrl: 'assets/images/saiyaara_cover.jpg',
+        audioUrl:
+            'assets/audio/Tum Ho Toh Song _ Saiyaara _ Ahaan Panday, Aneet Padda _ Vishal Mishra, Hansika Pareek _ Raj Shekhar.mp3',
+        duration: Duration(minutes: 3, seconds: 30),
+      ),
       // Western Hits
       Song(
         id: '1',

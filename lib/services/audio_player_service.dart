@@ -39,7 +39,13 @@ class AudioPlayerService extends ChangeNotifier {
 
   Future<void> playSong(Song song) async {
     _currentSong = song;
-    await _audioPlayer.setAudioSource(AudioSource.uri(Uri.parse(song.audioUrl)));
+    final AudioSource source;
+    if (song.audioUrl.startsWith('assets/')) {
+      source = AudioSource.asset(song.audioUrl);
+    } else {
+      source = AudioSource.uri(Uri.parse(song.audioUrl));
+    }
+    await _audioPlayer.setAudioSource(source);
     await _audioPlayer.play();
     notifyListeners();
   }

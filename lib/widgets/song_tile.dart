@@ -31,16 +31,18 @@ class SongTile extends StatelessWidget {
                 width: 56,
                 height: 56,
                 child: song.imageUrl.isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: song.imageUrl,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) =>
-                            Container(color: song.isLive ? Colors.red : Colors.deepPurple),
-                        errorWidget: (context, url, error) => Container(
-                          color: song.isLive ? Colors.red : Colors.deepPurple,
-                          child: const Icon(Icons.music_note, color: Colors.white),
-                        ),
-                      )
+                    ? (song.imageUrl.startsWith('assets/')
+                          ? Image.asset(song.imageUrl, fit: BoxFit.cover)
+                          : CachedNetworkImage(
+                              imageUrl: song.imageUrl,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) =>
+                                  Container(color: song.isLive ? Colors.red : Colors.deepPurple),
+                              errorWidget: (context, url, error) => Container(
+                                color: song.isLive ? Colors.red : Colors.deepPurple,
+                                child: const Icon(Icons.music_note, color: Colors.white),
+                              ),
+                            ))
                     : Container(
                         color: song.isLive ? Colors.red : Colors.deepPurple,
                         child: const Icon(Icons.music_note, color: Colors.white),
