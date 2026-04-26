@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../models/song.dart';
 import '../services/audio_player_service.dart';
+import '../services/download_service.dart';
 import '../screens/now_playing_screen.dart';
+import 'song_image.dart';
 
 class SongTile extends StatelessWidget {
   final Song song;
+  final List<Song>? playlist;
+  final int index;
 
-  const SongTile({super.key, required this.song});
+  const SongTile({super.key, required this.song, this.playlist, this.index = 0});
 
   @override
   Widget build(BuildContext context) {
@@ -16,38 +19,29 @@ class SongTile extends StatelessWidget {
     final isCurrent = player.currentSong?.id == song.id;
     final isPlaying = player.isPlaying && isCurrent;
 
+    void play() {
+      if (playlist != null && playlist!.isNotEmpty) {
+        player.playPlaylist(playlist!, startIndex: index);
+      } else {
+        player.playSong(song);
+      }
+    }
+
     return InkWell(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => NowPlayingScreen(song: song)),
-      ),
+      onTap: () {
+        if (!isCurrent) play();
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => NowPlayingScreen(song: song)),
+        );
+      },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: SizedBox(
-                width: 56,
-                height: 56,
-                child: song.imageUrl.isNotEmpty
-                    ? (song.imageUrl.startsWith('assets/')
-                          ? Image.asset(song.imageUrl, fit: BoxFit.cover)
-                          : CachedNetworkImage(
-                              imageUrl: song.imageUrl,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) =>
-                                  Container(color: song.isLive ? Colors.red : Colors.deepPurple),
-                              errorWidget: (context, url, error) => Container(
-                                color: song.isLive ? Colors.red : Colors.deepPurple,
-                                child: const Icon(Icons.music_note, color: Colors.white),
-                              ),
-                            ))
-                    : Container(
-                        color: song.isLive ? Colors.red : Colors.deepPurple,
-                        child: const Icon(Icons.music_note, color: Colors.white),
-                      ),
-              ),
+              child: SizedBox(width: 56, height: 56, child: SongImage(song: song)),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -106,6 +100,8 @@ class SongTile extends StatelessWidget {
                 style: TextStyle(color: Colors.grey[500], fontSize: 13),
               ),
             const SizedBox(width: 8),
+            _DownloadButton(song: song),
+            const SizedBox(width: 4),
             IconButton(
               icon: Icon(
                 isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
@@ -116,7 +112,7 @@ class SongTile extends StatelessWidget {
                 if (isCurrent) {
                   isPlaying ? player.pause() : player.play();
                 } else {
-                  player.playSong(song);
+                  play();
                 }
               },
             ),
@@ -134,12 +130,50 @@ class SongTile extends StatelessWidget {
   }
 }
 
-class _EqualizerBars extends StatefulWidget {
+class _DownloadButton extends StatelessWidget {
+  final Song song;
+
+  const _DownloadButton({required this.song});
+
   @override
-  __EqualizerBarsState createState() => __EqualizerBarsState();
+  Widget build(BuildContext context) {
+    final downloadService = context.watch<DownloadService>();
+
+    if (!song.audioUrl.startsWith('http')) return const SizedBox.shrink();
+
+    if (downloadService.isDownloaded(song.id)) {
+      return InkWell(
+        onTap: () => downloadService.deleteDownload(song.id),
+        child: const Icon(Icons.offline_pin, color: Color(0xFF673AB7), size: 28),
+      );
+    }
+
+    if (downloadService.isDownloading(song.id)) {
+      final progress = downloadService.getProgress(song.id) ?? 0;
+      return SizedBox(
+        width: 28,
+        height: 28,
+        child: CircularProgressIndicator(
+          value: progress > 0 ? progress : null,
+          strokeWidth: 2.5,
+          color: const Color(0xFF673AB7),
+        ),
+      );
+    }
+
+    return InkWell(
+      onTap: () => downloadService.downloadSong(song),
+      child: const Icon(Icons.download_for_offline_outlined, color: Colors.grey, size: 28),
+    );
+  }
 }
 
-class __EqualizerBarsState extends State<_EqualizerBars> with TickerProviderStateMixin {
+class _EqualizerBars extends StatefulWidget {
+  @override
+  _EqualizerBarsState createState() => _EqualizerBarsState();
+}
+
+class _EqualizerBarsState extends State<_EqualizerBars> with TickerProviderStateMixin {
   late final List<AnimationController> _controllers;
 
   @override

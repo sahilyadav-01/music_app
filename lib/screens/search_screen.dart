@@ -50,7 +50,8 @@ class _SearchScreenState extends State<SearchScreen> {
           : _results.isNotEmpty
           ? ListView.builder(
               itemCount: _results.length,
-              itemBuilder: (context, index) => SongTile(song: _results[index]),
+              itemBuilder: (context, index) =>
+                  SongTile(song: _results[index], playlist: _results, index: index),
             )
           : _buildEmptyState(),
     );

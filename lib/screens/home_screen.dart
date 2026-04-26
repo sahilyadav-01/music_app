@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/mock_api_service.dart';
+import '../services/audio_player_service.dart';
 import '../widgets/song_tile.dart';
+import '../widgets/song_image.dart';
 import '../screens/now_playing_screen.dart';
 import '../models/song.dart';
+import '../utils/greeting_helper.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -30,13 +34,13 @@ class HomeScreen extends StatelessWidget {
                     end: Alignment.bottomRight,
                   ),
                 ),
-                child: const Padding(
-                  padding: EdgeInsets.only(left: 20, bottom: 60),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 20, bottom: 60),
                   child: Align(
                     alignment: Alignment.bottomLeft,
                     child: Text(
-                      'Good morning!',
-                      style: TextStyle(
+                      getGreeting(),
+                      style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -55,7 +59,11 @@ class HomeScreen extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: recentSongs.length,
-                itemBuilder: (context, index) => _HorizontalSongCard(song: recentSongs[index]),
+                itemBuilder: (context, index) => _HorizontalSongCard(
+                  song: recentSongs[index],
+                  playlist: recentSongs,
+                  index: index,
+                ),
               ),
             ),
           ),
@@ -67,14 +75,16 @@ class HomeScreen extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: liveSongs.length,
-                itemBuilder: (context, index) => _HorizontalSongCard(song: liveSongs[index]),
+                itemBuilder: (context, index) =>
+                    _HorizontalSongCard(song: liveSongs[index], playlist: liveSongs, index: index),
               ),
             ),
           ),
           _buildSectionHeader('For You'),
           SliverList(
             delegate: SliverChildBuilderDelegate(
-              (context, index) => SongTile(song: forYouSongs[index]),
+              (context, index) =>
+                  SongTile(song: forYouSongs[index], playlist: forYouSongs, index: index),
               childCount: forYouSongs.length,
             ),
           ),
@@ -112,16 +122,25 @@ class HomeScreen extends StatelessWidget {
 
 class _HorizontalSongCard extends StatelessWidget {
   final Song song;
+  final List<Song>? playlist;
+  final int index;
 
-  const _HorizontalSongCard({required this.song});
+  const _HorizontalSongCard({required this.song, this.playlist, this.index = 0});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => NowPlayingScreen(song: song)),
-      ),
+      onTap: () {
+        if (playlist != null && playlist!.isNotEmpty) {
+          context.read<AudioPlayerService>().playPlaylist(playlist!, startIndex: index);
+        } else {
+          context.read<AudioPlayerService>().playSong(song);
+        }
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => NowPlayingScreen(song: song)),
+        );
+      },
       child: Container(
         width: 150,
         margin: const EdgeInsets.only(right: 12),
@@ -130,22 +149,7 @@ class _HorizontalSongCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: song.imageUrl.isNotEmpty
-                    ? Image.network(
-                        song.imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          color: song.isLive ? Colors.red : Colors.deepPurple,
-                          child: const Icon(Icons.music_note, color: Colors.white),
-                        ),
-                      )
-                    : Container(
-                        color: song.isLive ? Colors.red : Colors.deepPurple,
-                        child: const Icon(Icons.music_note, color: Colors.white),
-                      ),
-              ),
+              child: AspectRatio(aspectRatio: 1, child: SongImage(song: song)),
             ),
             const SizedBox(height: 8),
             Text(

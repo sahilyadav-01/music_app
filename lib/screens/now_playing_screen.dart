@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:just_audio/just_audio.dart';
 import '../services/audio_player_service.dart';
 import '../models/song.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import '../widgets/song_image.dart';
 
 class NowPlayingScreen extends StatefulWidget {
   final Song song;
@@ -16,11 +17,27 @@ class NowPlayingScreen extends StatefulWidget {
 class _NowPlayingScreenState extends State<NowPlayingScreen> {
   bool _isFavorite = false;
 
+  IconData _loopIcon(LoopMode mode) {
+    return switch (mode) {
+      LoopMode.off => Icons.repeat,
+      LoopMode.all => Icons.repeat_on,
+      LoopMode.one => Icons.repeat_one_on,
+    };
+  }
+
+  Color? _loopColor(LoopMode mode) {
+    return mode == LoopMode.off ? Colors.grey : const Color(0xFF673AB7);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AudioPlayerService>(
       builder: (context, player, child) {
         final song = player.currentSong ?? widget.song;
+        final effectiveIndex = player.currentSong != null ? player.currentIndex : -1;
+        final hasPrev = effectiveIndex > 0;
+        final hasNext = effectiveIndex >= 0 && effectiveIndex < player.songs.length - 1;
+
         return Scaffold(
           extendBodyBehindAppBar: true,
           appBar: AppBar(
@@ -67,35 +84,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                           type: MaterialType.transparency,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(16),
-                            child: AspectRatio(
-                              aspectRatio: 1,
-                              child: song.imageUrl.isNotEmpty
-                                  ? (song.imageUrl.startsWith('assets/')
-                                        ? Image.asset(song.imageUrl, fit: BoxFit.cover)
-                                        : CachedNetworkImage(
-                                            imageUrl: song.imageUrl,
-                                            fit: BoxFit.cover,
-                                            placeholder: (context, url) => Container(
-                                              color: song.isLive ? Colors.red : Colors.deepPurple,
-                                            ),
-                                            errorWidget: (context, url, error) => Container(
-                                              color: song.isLive ? Colors.red : Colors.deepPurple,
-                                              child: const Icon(
-                                                Icons.music_note,
-                                                size: 80,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ))
-                                  : Container(
-                                      color: song.isLive ? Colors.red : Colors.deepPurple,
-                                      child: const Icon(
-                                        Icons.music_note,
-                                        size: 80,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                            ),
+                            child: AspectRatio(aspectRatio: 1, child: SongImage(song: song)),
                           ),
                         ),
                       ),
@@ -216,14 +205,20 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.shuffle, color: Colors.grey),
+                                  icon: Icon(
+                                    _loopIcon(player.loopMode),
+                                    color: _loopColor(player.loopMode),
+                                  ),
                                   iconSize: 24,
-                                  onPressed: () {},
+                                  onPressed: player.toggleLoopMode,
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.skip_previous, color: Colors.white),
+                                  icon: Icon(
+                                    Icons.skip_previous,
+                                    color: hasPrev ? Colors.white : Colors.grey[600],
+                                  ),
                                   iconSize: 36,
-                                  onPressed: () {},
+                                  onPressed: hasPrev ? player.skipToPrevious : null,
                                 ),
                                 GestureDetector(
                                   onTap: player.isPlaying ? player.pause : player.play,
@@ -241,12 +236,15 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                                   ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.skip_next, color: Colors.white),
+                                  icon: Icon(
+                                    Icons.skip_next,
+                                    color: hasNext ? Colors.white : Colors.grey[600],
+                                  ),
                                   iconSize: 36,
-                                  onPressed: () {},
+                                  onPressed: hasNext ? player.skipToNext : null,
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.repeat, color: Colors.grey),
+                                  icon: const Icon(Icons.shuffle, color: Colors.grey),
                                   iconSize: 24,
                                   onPressed: () {},
                                 ),

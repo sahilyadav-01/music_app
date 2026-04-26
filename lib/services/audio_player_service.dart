@@ -3,20 +3,32 @@ import 'package:just_audio/just_audio.dart';
 import 'package:audio_service/audio_service.dart';
 import '../models/song.dart';
 
+import 'download_service.dart';
+
 class AudioPlayerService extends ChangeNotifier {
   final AudioPlayer _audioPlayer = AudioPlayer();
-  final ConcatenatingAudioSource _playlist = ConcatenatingAudioSource(children: []);
+  DownloadService? _downloadService;
 
   Song? _currentSong;
+  List<Song> _songs = [];
+  int _currentIndex = -1;
   bool _isPlaying = false;
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
+  LoopMode _loopMode = LoopMode.off;
 
   Song? get currentSong => _currentSong;
+  List<Song> get songs => _songs;
+  int get currentIndex => _currentIndex;
   bool get isPlaying => _isPlaying;
   Duration get position => _position;
   Duration get duration => _duration;
   AudioPlayer get audioPlayer => _audioPlayer;
+  LoopMode get loopMode => _loopMode;
+
+  void setDownloadService(DownloadService service) {
+    _downloadService = service;
+  }
 
   AudioPlayerService() {
     _init();
@@ -35,27 +47,86 @@ class AudioPlayerService extends ChangeNotifier {
       _isPlaying = state.playing;
       notifyListeners();
     });
+    _audioPlayer.currentIndexStream.listen((index) {
+      if (index != null && index >= 0 && index < _songs.length) {
+        _currentIndex = index;
+        _currentSong = _songs[index];
+        notifyListeners();
+      }
+    });
+    _audioPlayer.loopModeStream.listen((mode) {
+      _loopMode = mode;
+      notifyListeners();
+    });
+  }
+
+  Future<void> playPlaylist(List<Song> songs, {int startIndex = 0}) async {
+    if (songs.isEmpty) return;
+    _songs = songs;
+    _currentIndex = startIndex.clamp(0, songs.length - 1);
+    _currentSong = songs[_currentIndex];
+
+    final sources = songs.map((song) {
+      final url = _downloadService?.getAudioUrl(song) ?? song.audioUrl;
+      if (url.startsWith('assets/')) {
+        return AudioSource.asset(url);
+      } else if (url.startsWith('file://') ||
+          url.contains(RegExp(r'^[a-zA-Z]:\\')) ||
+          url.startsWith('/')) {
+        return AudioSource.uri(Uri.file(url));
+      } else {
+        return AudioSource.uri(Uri.parse(url));
+      }
+    }).toList();
+
+    await _audioPlayer.setAudioSources(sources, initialIndex: _currentIndex);
+    await _audioPlayer.play();
+    notifyListeners();
   }
 
   Future<void> playSong(Song song) async {
-    _currentSong = song;
-    final AudioSource source;
-    if (song.audioUrl.startsWith('assets/')) {
-      source = AudioSource.asset(song.audioUrl);
-    } else {
-      source = AudioSource.uri(Uri.parse(song.audioUrl));
-    }
-    await _audioPlayer.setAudioSource(source);
-    await _audioPlayer.play();
-    notifyListeners();
+    await playPlaylist([song], startIndex: 0);
   }
 
   Future<void> play() async => await _audioPlayer.play();
   Future<void> pause() async => await _audioPlayer.pause();
   Future<void> seek(Duration position) async => await _audioPlayer.seek(position);
   Future<void> stop() async => await _audioPlayer.stop();
+
+  Future<void> skipToNext() async {
+    if (_songs.isEmpty) return;
+    if (_currentIndex < _songs.length - 1) {
+      await _audioPlayer.seekToNext();
+    } else if (_loopMode == LoopMode.all) {
+      await _audioPlayer.seek(Duration.zero, index: 0);
+      await _audioPlayer.play();
+    }
+  }
+
+  Future<void> skipToPrevious() async {
+    if (_songs.isEmpty) return;
+    if (_currentIndex > 0) {
+      await _audioPlayer.seekToPrevious();
+    } else if (_loopMode == LoopMode.all) {
+      await _audioPlayer.seek(Duration.zero, index: _songs.length - 1);
+      await _audioPlayer.play();
+    }
+  }
+
+  Future<void> toggleLoopMode() async {
+    final nextMode = switch (_loopMode) {
+      LoopMode.off => LoopMode.all,
+      LoopMode.all => LoopMode.one,
+      LoopMode.one => LoopMode.off,
+    };
+    await _audioPlayer.setLoopMode(nextMode);
+  }
+
   @override
-  Future<void> dispose() async => await _audioPlayer.dispose();
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
 
   void closePlayer() {
     _audioPlayer.dispose();

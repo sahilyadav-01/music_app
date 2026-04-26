@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../services/audio_player_service.dart';
 import '../screens/now_playing_screen.dart';
+import 'song_image.dart';
 
 class NowPlayingBar extends StatelessWidget {
   const NowPlayingBar({super.key});
@@ -13,6 +13,9 @@ class NowPlayingBar extends StatelessWidget {
       builder: (context, player, child) {
         final song = player.currentSong;
         if (song == null) return const SizedBox.shrink();
+
+        final hasPrev = player.currentIndex > 0;
+        final hasNext = player.currentIndex < player.songs.length - 1;
 
         return Material(
           color: const Color(0xFF1A1A1A),
@@ -53,31 +56,7 @@ class NowPlayingBar extends StatelessWidget {
                         tag: song.id,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(6),
-                          child: SizedBox(
-                            width: 48,
-                            height: 48,
-                            child: song.imageUrl.isNotEmpty
-                                ? (song.imageUrl.startsWith('assets/')
-                                      ? Image.asset(song.imageUrl, fit: BoxFit.cover)
-                                      : CachedNetworkImage(
-                                          imageUrl: song.imageUrl,
-                                          fit: BoxFit.cover,
-                                          placeholder: (context, url) => Container(
-                                            color: song.isLive ? Colors.red : Colors.deepPurple,
-                                          ),
-                                          errorWidget: (context, url, error) => Container(
-                                            color: song.isLive ? Colors.red : Colors.deepPurple,
-                                            child: const Icon(
-                                              Icons.music_note,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ))
-                                : Container(
-                                    color: song.isLive ? Colors.red : Colors.deepPurple,
-                                    child: const Icon(Icons.music_note, color: Colors.white),
-                                  ),
-                          ),
+                          child: SizedBox(width: 48, height: 48, child: SongImage(song: song)),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -107,11 +86,12 @@ class NowPlayingBar extends StatelessWidget {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.skip_previous, color: Colors.white),
+                        icon: Icon(
+                          Icons.skip_previous,
+                          color: hasPrev ? Colors.white : Colors.grey[600],
+                        ),
                         iconSize: 28,
-                        onPressed: () {
-                          // TODO: previous track
-                        },
+                        onPressed: hasPrev ? player.skipToPrevious : null,
                       ),
                       IconButton(
                         icon: Icon(
@@ -122,11 +102,12 @@ class NowPlayingBar extends StatelessWidget {
                         onPressed: player.isPlaying ? player.pause : player.play,
                       ),
                       IconButton(
-                        icon: const Icon(Icons.skip_next, color: Colors.white),
+                        icon: Icon(
+                          Icons.skip_next,
+                          color: hasNext ? Colors.white : Colors.grey[600],
+                        ),
                         iconSize: 28,
-                        onPressed: () {
-                          // TODO: next track
-                        },
+                        onPressed: hasNext ? player.skipToNext : null,
                       ),
                     ],
                   ),

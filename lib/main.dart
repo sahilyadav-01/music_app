@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'services/audio_player_service.dart';
+import 'services/download_service.dart';
 import 'screens/home_screen.dart';
 import 'screens/live_screen.dart';
 import 'screens/search_screen.dart';
@@ -8,7 +9,21 @@ import 'screens/library_screen.dart';
 import 'widgets/now_playing_bar.dart';
 
 void main() {
-  runApp(ChangeNotifierProvider(create: (context) => AudioPlayerService(), child: const MyApp()));
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => DownloadService()),
+        ChangeNotifierProxyProvider<DownloadService, AudioPlayerService>(
+          create: (_) => AudioPlayerService(),
+          update: (_, downloadService, audioService) {
+            audioService!.setDownloadService(downloadService);
+            return audioService;
+          },
+        ),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

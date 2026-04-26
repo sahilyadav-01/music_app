@@ -49,7 +49,7 @@ class LibraryScreen extends StatelessWidget {
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
-              (context, index) => SongTile(song: songs[index]),
+              (context, index) => SongTile(song: songs[index], playlist: songs, index: index),
               childCount: songs.length,
             ),
           ),
