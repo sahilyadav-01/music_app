@@ -24,9 +24,9 @@ class NowPlayingBar extends StatelessWidget {
             children: [
               // Progress bar
               StreamBuilder<Duration>(
-                stream: player.audioPlayer.positionStream,
+                stream: Stream.periodic(const Duration(milliseconds: 500), (_) => player.position),
                 builder: (context, snapshot) {
-                  final position = snapshot.data ?? Duration.zero;
+                  final position = player.position;
                   final duration = player.duration;
                   final max = duration.inMilliseconds > 0
                       ? duration.inMilliseconds.toDouble()

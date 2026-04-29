@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:audio_service/audio_service.dart';
 import '../models/song.dart';
-
 import 'download_service.dart';
 
 class AudioPlayerService extends ChangeNotifier {
@@ -70,9 +68,7 @@ class AudioPlayerService extends ChangeNotifier {
       final url = _downloadService?.getAudioUrl(song) ?? song.audioUrl;
       if (url.startsWith('assets/')) {
         return AudioSource.asset(url);
-      } else if (url.startsWith('file://') ||
-          url.contains(RegExp(r'^[a-zA-Z]:\\')) ||
-          url.startsWith('/')) {
+      } else if (url.startsWith('file://') || url.startsWith('/')) {
         return AudioSource.uri(Uri.file(url));
       } else {
         return AudioSource.uri(Uri.parse(url));
@@ -127,24 +123,4 @@ class AudioPlayerService extends ChangeNotifier {
     _audioPlayer.dispose();
     super.dispose();
   }
-
-  void closePlayer() {
-    _audioPlayer.dispose();
-  }
-}
-
-// Background handler for audio_service (basic)
-class BackgroundAudioHandler extends BaseAudioHandler {
-  final AudioPlayerService playerService;
-
-  BackgroundAudioHandler(this.playerService);
-
-  @override
-  Future<void> play() => playerService.play();
-
-  @override
-  Future<void> pause() => playerService.pause();
-
-  @override
-  Future<void> stop() => playerService.stop();
 }

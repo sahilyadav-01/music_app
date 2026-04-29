@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'services/audio_player_service.dart';
+
 import 'services/download_service.dart';
+
 import 'screens/home_screen.dart';
 import 'screens/live_screen.dart';
 import 'screens/search_screen.dart';
@@ -13,13 +15,7 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => DownloadService()),
-        ChangeNotifierProxyProvider<DownloadService, AudioPlayerService>(
-          create: (_) => AudioPlayerService(),
-          update: (_, downloadService, audioService) {
-            audioService!.setDownloadService(downloadService);
-            return audioService;
-          },
-        ),
+        ChangeNotifierProvider<AudioPlayerService>(create: (_) => AudioPlayerService()),
       ],
       child: const MyApp(),
     ),
