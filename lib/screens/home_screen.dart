@@ -4,7 +4,7 @@ import '../services/mock_api_service.dart';
 import '../services/audio_player_service.dart';
 import '../widgets/song_tile.dart';
 import '../widgets/song_image.dart';
-import 'package:music_app/screens/now_playing_screen.dart';
+import 'now_playing_screen.dart';
 import '../models/song.dart';
 import '../utils/greeting_helper.dart';
 

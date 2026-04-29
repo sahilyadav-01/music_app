@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/song.dart';
 import '../services/audio_player_service.dart';
 import '../services/download_service.dart';
-import '../screens/now_playing_screen.dart';
+import '../../screens/now_playing_screen.dart';
 import 'song_image.dart';
 
 class SongTile extends StatelessWidget {

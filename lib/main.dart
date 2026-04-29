@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'services/audio_player_service.dart';
 
@@ -54,6 +55,12 @@ class MyApp extends StatelessWidget {
           elevation: 8,
         ),
       ),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('en', '')],
       home: const MainTabScreen(),
       debugShowCheckedModeBanner: false,
     );

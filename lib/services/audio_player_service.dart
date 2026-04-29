@@ -24,6 +24,9 @@ class AudioPlayerService extends ChangeNotifier {
   AudioPlayer get audioPlayer => _audioPlayer;
   LoopMode get loopMode => _loopMode;
 
+  bool get hasPrevious => _songs.isNotEmpty && _currentIndex > 0;
+  bool get hasNext => _songs.isNotEmpty && _currentIndex < _songs.length - 1;
+
   void setDownloadService(DownloadService service) {
     _downloadService = service;
   }

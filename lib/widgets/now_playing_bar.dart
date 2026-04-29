@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/audio_player_service.dart';
-import '../screens/now_playing_screen.dart';
+import '../../screens/now_playing_screen.dart';
 import 'song_image.dart';
 
 class NowPlayingBar extends StatelessWidget {
