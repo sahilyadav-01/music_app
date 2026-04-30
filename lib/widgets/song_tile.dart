@@ -30,10 +30,7 @@ class SongTile extends StatelessWidget {
     return InkWell(
       onTap: () {
         if (!isCurrent) play();
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => NowPlayingScreen(song: song)),
-        );
+        Navigator.push(context, MaterialPageRoute(builder: (context) => const NowPlayingScreen()));
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

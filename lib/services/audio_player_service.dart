@@ -14,6 +14,9 @@ class AudioPlayerService extends ChangeNotifier {
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
   LoopMode _loopMode = LoopMode.off;
+  double _playbackSpeed = 1.0;
+  bool _isShuffled = false;
+  List<int> _shuffleOrder = [];
 
   Song? get currentSong => _currentSong;
   List<Song> get songs => _songs;
@@ -23,6 +26,8 @@ class AudioPlayerService extends ChangeNotifier {
   Duration get duration => _duration;
   AudioPlayer get audioPlayer => _audioPlayer;
   LoopMode get loopMode => _loopMode;
+  double get playbackSpeed => _playbackSpeed;
+  bool get isShuffled => _isShuffled;
 
   bool get hasPrevious => _songs.isNotEmpty && _currentIndex > 0;
   bool get hasNext => _songs.isNotEmpty && _currentIndex < _songs.length - 1;
@@ -59,15 +64,20 @@ class AudioPlayerService extends ChangeNotifier {
       _loopMode = mode;
       notifyListeners();
     });
+    _audioPlayer.speedStream.listen((speed) {
+      _playbackSpeed = speed;
+      notifyListeners();
+    });
   }
 
   Future<void> playPlaylist(List<Song> songs, {int startIndex = 0}) async {
     if (songs.isEmpty) return;
-    _songs = songs;
+    _songs = List.from(songs);
     _currentIndex = startIndex.clamp(0, songs.length - 1);
     _currentSong = songs[_currentIndex];
+    _generateShuffleOrder();
 
-    final sources = songs.map((song) {
+    final sources = _songs.map((song) {
       final url = _downloadService?.getAudioUrl(song) ?? song.audioUrl;
       if (url.startsWith('assets/')) {
         return AudioSource.asset(url);
@@ -79,6 +89,7 @@ class AudioPlayerService extends ChangeNotifier {
     }).toList();
 
     await _audioPlayer.setAudioSources(sources, initialIndex: _currentIndex);
+    await _audioPlayer.setSpeed(_playbackSpeed);
     await _audioPlayer.play();
     notifyListeners();
   }
@@ -120,6 +131,28 @@ class AudioPlayerService extends ChangeNotifier {
     };
     await _audioPlayer.setLoopMode(nextMode);
   }
+
+  Future<void> toggleShuffle() async {
+    _isShuffled = !_isShuffled;
+    if (_isShuffled) {
+      _generateShuffleOrder();
+    } else {
+      _shuffleOrder.clear();
+    }
+    notifyListeners();
+  }
+
+  void _generateShuffleOrder() {
+    _shuffleOrder = List.generate(_songs.length, (i) => i)..shuffle();
+  }
+
+  Future<void> setPlaybackSpeed(double speed) async {
+    _playbackSpeed = speed.clamp(0.5, 2.0);
+    await _audioPlayer.setSpeed(_playbackSpeed);
+    notifyListeners();
+  }
+
+  Stream<Duration?> get bufferedPositionStream => _audioPlayer.bufferedPositionStream;
 
   @override
   void dispose() {

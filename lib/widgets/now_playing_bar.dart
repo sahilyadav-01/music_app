@@ -44,7 +44,7 @@ class NowPlayingBar extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => NowPlayingScreen(song: song)),
+                    MaterialPageRoute(builder: (context) => const NowPlayingScreen()),
                   );
                 },
                 child: Container(

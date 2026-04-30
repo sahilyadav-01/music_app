@@ -136,10 +136,7 @@ class _HorizontalSongCard extends StatelessWidget {
         } else {
           context.read<AudioPlayerService>().playSong(song);
         }
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => NowPlayingScreen(song: song)),
-        );
+        Navigator.push(context, MaterialPageRoute(builder: (context) => const NowPlayingScreen()));
       },
       child: Container(
         width: 150,
