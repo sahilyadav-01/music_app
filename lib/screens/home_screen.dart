@@ -51,7 +51,10 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          _buildSectionHeader('Recent'),
+          _buildSectionHeader(
+            'Recent',
+            onSeeAll: () => _showFullList(context, 'Recent', recentSongs),
+          ),
           SliverToBoxAdapter(
             child: SizedBox(
               height: 200,
@@ -67,7 +70,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          _buildSectionHeader('Live Now'),
+          _buildSectionHeader('Live Now', onSeeAll: () => _navigateToLive(context)),
           SliverToBoxAdapter(
             child: SizedBox(
               height: 200,
@@ -80,7 +83,10 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          _buildSectionHeader('For You'),
+          _buildSectionHeader(
+            'For You',
+            onSeeAll: () => _showFullList(context, 'For You', forYouSongs),
+          ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) =>
@@ -94,7 +100,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(String title, {required VoidCallback onSeeAll}) {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
@@ -110,13 +116,75 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: onSeeAll,
               child: const Text('See all', style: TextStyle(color: Color(0xFF673AB7))),
             ),
           ],
         ),
       ),
     );
+  }
+
+  void _showFullList(BuildContext context, String title, List<Song> songs) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.85,
+        decoration: const BoxDecoration(
+          color: Color(0xFF1A1A1A),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: songs.length,
+                itemBuilder: (context, index) =>
+                    SongTile(song: songs[index], playlist: songs, index: index),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _navigateToLive(BuildContext context) {
+    // Switch to Live tab (index 1)
+    final mainState = context.findAncestorStateOfType<State>();
+    if (mainState != null && mainState.mounted) {
+      // We need to find the MainTabScreen and switch to Live tab
+      // For now, just show a message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Switching to Live tab...'),
+          backgroundColor: Color(0xFF673AB7),
+        ),
+      );
+    }
   }
 }
 

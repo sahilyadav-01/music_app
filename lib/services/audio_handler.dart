@@ -8,7 +8,6 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, QueueHandler {
   final DownloadService? _downloadService;
 
   AudioHandler(this._downloadService) {
-    // Playback event listener
     _player.playbackEventStream.listen((event) {
       playbackState.add(
         playbackState.value.copyWith(
@@ -61,7 +60,6 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, QueueHandler {
     await _player.setAudioSources(playlist, initialIndex: startIndex);
     await _player.play();
 
-    // Update queue with MediaItems
     final mediaItems = songs
         .map(
           (song) => MediaItem(
@@ -82,24 +80,17 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, QueueHandler {
     await playPlaylist([song]);
   }
 
-  @override
   Future<void> onPlay() async => await _player.play();
 
-  @override
   Future<void> onPause() async => await _player.pause();
 
-  @override
   Future<void> onSeek(Duration position) async => await _player.seek(position);
 
-  @override
   Future<void> onSkipToNext() async => await _player.seekToNext();
 
-  @override
   Future<void> onSkipToPrevious() async => await _player.seekToPrevious();
 
-  @override
   Future<void> onUpdateQueue(List<MediaItem> queueItems) async {
-    // Update internal queue from MediaItems
     final songs = queueItems.map((item) => Song.fromJson(item.extras ?? {})).toList();
     await playPlaylist(songs);
   }
