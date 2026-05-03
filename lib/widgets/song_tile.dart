@@ -134,9 +134,9 @@ class _DownloadButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final downloadService = context.watch<DownloadService>();
-
-    if (!song.audioUrl.startsWith('http')) return const SizedBox.shrink();
+    final downloadService = context.read<DownloadService?>();
+    if (downloadService == null || !song.audioUrl.startsWith('http'))
+      return const SizedBox.shrink();
 
     if (downloadService.isDownloaded(song.id)) {
       return InkWell(

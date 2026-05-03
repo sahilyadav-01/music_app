@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/services.dart' show PlatformException, rootBundle;
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
@@ -20,6 +22,10 @@ class DownloadService extends ChangeNotifier {
   }
 
   Future<void> _loadDownloadedSongs() async {
+    if (kIsWeb) {
+      notifyListeners();
+      return;
+    }
     final dir = await _getDownloadDir();
     if (!await dir.exists()) return;
 
@@ -34,6 +40,12 @@ class DownloadService extends ChangeNotifier {
   }
 
   Future<Directory> _getDownloadDir() async {
+    if (kIsWeb) {
+      throw PlatformException(
+        code: 'UNSUPPORTED',
+        message: 'File system access not supported on web',
+      );
+    }
     final appDir = await getApplicationDocumentsDirectory();
     final downloadDir = Directory('${appDir.path}/music_downloads');
     if (!await downloadDir.exists()) {
@@ -43,6 +55,10 @@ class DownloadService extends ChangeNotifier {
   }
 
   Future<void> downloadSong(Song song) async {
+    if (kIsWeb) {
+      // TODO: Web download via anchor tag to Downloads folder
+      return;
+    }
     if (_downloading[song.id] == true || _localPaths[song.id] != null) return;
     if (!song.audioUrl.startsWith('http')) return;
 
@@ -76,6 +92,7 @@ class DownloadService extends ChangeNotifier {
   }
 
   Future<void> deleteDownload(String songId) async {
+    if (kIsWeb) return;
     final path = _localPaths[songId];
     if (path != null) {
       final file = File(path);

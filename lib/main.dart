@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'services/audio_player_service.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'services/download_service.dart';
 import 'services/favorites_service.dart';
 import 'services/search_history_service.dart';
@@ -18,7 +19,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => DownloadService()),
+        if (!kIsWeb) ChangeNotifierProvider(create: (_) => DownloadService()),
         ChangeNotifierProvider<FavoritesService>(create: (_) => FavoritesService()),
         ChangeNotifierProvider<SearchHistoryService>(create: (_) => SearchHistoryService()),
         ChangeNotifierProvider<AudioPlayerService>(create: (_) => AudioPlayerService()),

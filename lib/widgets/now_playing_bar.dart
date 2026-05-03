@@ -19,6 +19,7 @@ class NowPlayingBar extends StatelessWidget {
 
         return Material(
           color: const Color(0xFF1A1A1A),
+          elevation: 8,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -48,18 +49,18 @@ class NowPlayingBar extends StatelessWidget {
                   );
                 },
                 child: Container(
-                  height: 68,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  height: 64,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
                       Hero(
                         tag: song.id,
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(6),
-                          child: SizedBox(width: 48, height: 48, child: SongImage(song: song)),
+                          borderRadius: BorderRadius.circular(8),
+                          child: SizedBox(width: 32, height: 32, child: SongImage(song: song)),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 16),
                       Expanded(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -70,15 +71,19 @@ class NowPlayingBar extends StatelessWidget {
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
-                                fontSize: 14,
+                                fontSize: 16,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 2),
+                            const SizedBox(height: 4),
                             Text(
                               song.artist,
-                              style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                              style: TextStyle(
+                                color: Colors.grey[400],
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -90,7 +95,7 @@ class NowPlayingBar extends StatelessWidget {
                           Icons.skip_previous,
                           color: hasPrev ? Colors.white : Colors.grey[600],
                         ),
-                        iconSize: 28,
+                        iconSize: 24,
                         onPressed: hasPrev ? player.skipToPrevious : null,
                       ),
                       IconButton(
@@ -98,7 +103,7 @@ class NowPlayingBar extends StatelessWidget {
                           player.isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
                           color: Colors.white,
                         ),
-                        iconSize: 40,
+                        iconSize: 24,
                         onPressed: player.isPlaying ? player.pause : player.play,
                       ),
                       IconButton(
@@ -106,7 +111,7 @@ class NowPlayingBar extends StatelessWidget {
                           Icons.skip_next,
                           color: hasNext ? Colors.white : Colors.grey[600],
                         ),
-                        iconSize: 28,
+                        iconSize: 24,
                         onPressed: hasNext ? player.skipToNext : null,
                       ),
                     ],
