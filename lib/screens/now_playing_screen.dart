@@ -80,7 +80,6 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
     }
 
     final isFavorite = favorites.isFavorite(song.id);
-    final albumSize = (screenWidth * 0.75).clamp(220.0, screenHeight * 0.4);
 
     return Scaffold(
       body: Container(
@@ -126,78 +125,96 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                 ),
               ),
 
-              // Album art & song info
+              // Album art & song info - Fixed scroll layout
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Visualizer
-                        const SizedBox(height: 8),
-                        SizedBox(width: 120, height: 6, child: MusicVisualizer()),
-                        const SizedBox(height: 24),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final albumSize = (constraints.maxWidth * 0.75)
+                        .clamp(220.0, constraints.maxHeight * 0.45)
+                        .toDouble();
 
-                        // Album art
-                        AnimatedBuilder(
-                          animation: _pulseController,
-                          builder: (context, child) {
-                            return Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color:
-                                        dominantColor?.withValues(alpha: 0.4) ??
-                                        Colors.purple.withValues(alpha: 0.4),
-                                    blurRadius: 30 + (20 * _pulseController.value),
-                                    spreadRadius: 5,
-                                  ),
-                                ],
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: SongImage(song: song, width: albumSize, height: albumSize),
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 32),
+                    return ConstrainedBox(
+                      constraints: BoxConstraints(maxHeight: constraints.maxHeight * 0.7),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 32),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Visualizer
+                              const SizedBox(height: 8),
+                              SizedBox(width: 120, height: 6, child: MusicVisualizer()),
+                              const SizedBox(height: 24),
 
-                        // Song title
-                        Text(
-                          song.title,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                              // Album art - AspectRatio for square, constrained
+                              AnimatedBuilder(
+                                animation: _pulseController,
+                                builder: (context, child) {
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color:
+                                              dominantColor?.withValues(alpha: 0.4) ??
+                                              Colors.purple.withValues(alpha: 0.4),
+                                          blurRadius: 30 + (20 * _pulseController.value),
+                                          spreadRadius: 5,
+                                        ),
+                                      ],
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: AspectRatio(
+                                        aspectRatio: 1.0,
+                                        child: SizedBox(
+                                          width: albumSize,
+                                          height: albumSize,
+                                          child: SongImage(song: song),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              const SizedBox(height: 32),
+
+                              // Song title
+                              Text(
+                                song.title,
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 8),
+
+                              // Artist
+                              Text(
+                                song.artist,
+                                style: TextStyle(fontSize: 16, color: Colors.grey[400]),
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                              ),
+                              const SizedBox(height: 4),
+
+                              // Album
+                              Text(
+                                song.album ?? 'Single',
+                                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 8),
-
-                        // Artist
-                        Text(
-                          song.artist,
-                          style: TextStyle(fontSize: 16, color: Colors.grey[400]),
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                        ),
-                        const SizedBox(height: 4),
-
-                        // Album
-                        Text(
-                          song.album ?? 'Single',
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
 
