@@ -66,6 +66,9 @@ See [TODO.md](TODO.md) for progress and next steps.
 ## 🤝 Contributing
 PRs welcome! Focus areas: real APIs, device integration, UI polish.
 
+## 🔗 GitHub
+Project repository: https://github.com/sahil-yadav/music_app
+
 ## 📄 License
 MIT - See [LICENSE](LICENSE) (create if needed)
 
